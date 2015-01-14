@@ -12,9 +12,9 @@ class GameState:
             print(row)
 
     def update_game_state(self, test_input):
-        print("HERE IT IS\n\n")
-        test_input2 = test_input[3:418]
-        print(test_input2+"\n\n")
+        for ndx, row in enumerate(self.row):
+            self.row[ndx] = input()
+
 
 x = GameState()
 
