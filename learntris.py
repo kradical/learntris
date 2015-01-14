@@ -11,6 +11,11 @@ class GameState:
         for row in self.row:
             print(row)
 
+    def update_game_state(self, test_input):
+        print("HERE IT IS\n\n")
+        test_input2 = test_input[3:418]
+        print(test_input2+"\n\n")
+
 x = GameState()
 
 while True:
@@ -19,3 +24,5 @@ while True:
         break
     elif command == 'p':
         x.print_game_state()
+    elif command == 'g':
+        x.update_game_state(command)
