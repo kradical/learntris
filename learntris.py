@@ -1,4 +1,4 @@
-#learntris.py version 0.0.2
+#learntris.py version 0.0.3
 
 
 class GameState:
@@ -9,7 +9,14 @@ class GameState:
         self.score = 0
         self.lines_cleared = 0
         self.active = []
-
+        self.active_dictionary = {}
+        self.active_dictionary['cyan'] = ['. . . .', 'c c c c ', '. . . .', '. . . .']
+        self.active_dictionary['yellow'] = ['y y', 'y y']
+        self.active_dictionary['red'] = ['r r .', '. r r', '. . .']
+        self.active_dictionary['green'] = ['. g g', 'g g .', '. . .']
+        self.active_dictionary['blue'] = ['b . .', 'b b b', '. . .']
+        self.active_dictionary['orange'] = ['. . o', 'o o o', '. . .']
+        self.active_dictionary['magenta'] = ['. m .', 'm m m', '. . .']
     def print_game_state(self):
         for row in self.row:
             print(row)
@@ -35,15 +42,10 @@ class GameState:
                 self.score += 100
                 self.lines_cleared += 1
 
-    def set_active_cyan(self):
+    def set_active(self, tetranimo):
         self.active.clear()
-        for i in range(0, 4):
-            self.active.append(". . . .")
-        self.active[1] = "c c c c"
-        return
-
-    def set_active_yellow(self):
-        self.active.clear()
+        for row in self.active_dictionary[tetranimo]:
+            self.active.append(row)
         return
 
     def check_active(self):
@@ -69,8 +71,20 @@ while True:
     elif command == 's':
         x.step_game()
     elif command == 'I':
-        x.set_active_cyan()
+        x.set_active("cyan")
+    elif command == 'O':
+        x.set_active("yellow")
+    elif command == 'Z':
+        x.set_active("red")
+    elif command == 'S':
+        x.set_active("green")
+    elif command == 'J':
+        x.set_active("blue")
+    elif command == 'L':
+        x.set_active("orange")
+    elif command == 'T':
+        x.set_active("magenta")
     elif command == 't':
         x.check_active()
-    elif command == 'O':
-        x.set_active_yellow()
+    else:
+        print("HAHAHA"+command)
