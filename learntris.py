@@ -1,4 +1,4 @@
-# learntris.py version 0.0.4
+# learntris.py version 0.0.5
 from sys import stdin
 
 
@@ -62,7 +62,14 @@ class GameState:
         stdin.read(1)
 
     def rotate_clockwise(self):
-        return
+        stdin.read(1)
+        temp = []
+        for row in self.active:
+            temp.append('')
+        for ndx2, col in enumerate(self.active):
+            for ndx1, row in enumerate(self.active):
+                temp[ndx2] += self.active[len(self.active)-1-ndx1][2*ndx2]+' '
+        self.active = temp
 
 x = GameState()
 command = ''
@@ -114,7 +121,7 @@ while True:
     elif command == 't':
         x.check_active()
         command = ''
-    elif command == '>':
+    elif command == ')':
         x.rotate_clockwise()
         command = ''
     else:
