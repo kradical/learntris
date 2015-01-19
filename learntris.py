@@ -1,6 +1,5 @@
-# learntris.py version 0.0.6
+# learntris.py version 0.0.5
 from sys import stdin
-import re
 
 
 class GameState:
@@ -10,10 +9,9 @@ class GameState:
             self.row.append(". . . . . . . . . .")
         self.score = 0
         self.lines_cleared = 0
-        self.active_name = ''
         self.active = []
-        self.active_dictionary = dict()
-        self.active_dictionary['cyan'] = ['. . . .', 'c c c c', '. . . .', '. . . .']
+        self.active_dictionary = {}
+        self.active_dictionary['cyan'] = ['. . . .', 'c c c c ', '. . . .', '. . . .']
         self.active_dictionary['yellow'] = ['y y', 'y y']
         self.active_dictionary['red'] = ['r r .', '. r r', '. . .']
         self.active_dictionary['green'] = ['. g g', 'g g .', '. . .']
@@ -24,6 +22,7 @@ class GameState:
     def print_game_state(self):
         for row in self.row:
             print(row)
+        stdin.read(1)
 
     def update_game_state(self):
         stdin.read(1)
@@ -33,12 +32,15 @@ class GameState:
     def clear_game_state(self):
         for ndx, row in enumerate(self.row):
             self.row[ndx] = ". . . . . . . . . ."
+        stdin.read(1)
 
     def query_score(self):
         print(self.score)
+        stdin.read(1)
 
     def query_lines_cleared(self):
         print(self.lines_cleared)
+        stdin.read(1)
 
     def step_game(self):
         for ndx, row in enumerate(self.row):
@@ -46,63 +48,36 @@ class GameState:
                 self.row[ndx] = ". . . . . . . . . ."
                 self.score += 100
                 self.lines_cleared += 1
+        stdin.read(1)
 
     def set_active(self, tetranimo):
         self.active.clear()
-        self.active_name = tetranimo
         for row in self.active_dictionary[tetranimo]:
             self.active.append(row)
-        for line in range(2):
-            if self.active_name == 'cyan':
-                self.row[line] = self.active[line].upper().join((". . . ", " . . ."))
-            elif self.active_name == 'yellow':
-                self.row[line] = self.active[line].upper().join((". . . . ", " . . . ."))
-            else:
-                self.row[line] = self.active[line].upper().join((". . . ", " . . . ."))
+        stdin.read(1)
 
     def check_active(self):
         for row in self.active:
             print(row)
+        stdin.read(1)
 
     def rotate_clockwise(self):
+        stdin.read(1)
         temp = []
-        for _ in self.active:
+        for row in self.active:
             temp.append('')
         for ndx2, col in enumerate(self.active):
             for ndx1, row in enumerate(self.active):
                 temp[ndx2] += self.active[len(self.active)-1-ndx1][2*ndx2]+' '
         self.active = temp
 
-    @staticmethod
-    def output_line():
-        print()
-
-    def nudge_left(self):
-        for ndx, line in enumerate(self.row):
-            match = re.search(r'[A-Z]', line)
-            if match:
-                self.row[ndx] = line[2:]+" ."
-
-    def nudge_right(self):
-        for ndx, line in enumerate(self.row):
-            match = re.search(r'[A-Z]', line)
-            if match:
-                self.row[ndx] = ". "+line[:18]
-
-    def nudge_down(self):
-        for ndx, line in enumerate(self.row):
-            from_bottom_ndx = len(self.row) - ndx - 1
-            match = re.search(r'[A-Z]', self.row[from_bottom_ndx])
-            if match:
-                self.row[from_bottom_ndx], self.row[from_bottom_ndx+1] = self.row[from_bottom_ndx+1], self.row[from_bottom_ndx]
-
 x = GameState()
 command = ''
 while True:
     command += stdin.read(1)
     if command == 'q':
-        exit()
-    elif command == 'p' or command == 'P':
+        break
+    elif command == 'p':
         x.print_game_state()
         command = ''
     elif command == 'g':
@@ -148,18 +123,6 @@ while True:
         command = ''
     elif command == ')':
         x.rotate_clockwise()
-        command = ''
-    elif command == ';':
-        x.output_line()
-        command = ''
-    elif command == '<':
-        x.nudge_left()
-        command = ''
-    elif command == '>':
-        x.nudge_right()
-        command = ''
-    elif command == 'v':
-        x.nudge_down()
         command = ''
     else:
         command = ''
