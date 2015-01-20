@@ -73,21 +73,40 @@ class GameState:
                 temp[ndx2] += self.active[len(self.active)-1-ndx1][2*ndx2]+' '
         self.active = temp
 
+    def rotate_anticlockwise(self):
+        temp = []
+        for _ in self.active:
+            temp.append('')
+        for ndx2, col in enumerate(self.active):
+            for ndx1, row in enumerate(self.active):
+                pass
+        self.active = temp
+
     @staticmethod
     def output_line():
         print()
 
     def nudge_left(self):
+        lines_that_need_shift = []
         for ndx, line in enumerate(self.row):
             match = re.search(r'[A-Z]', line)
             if match:
-                self.row[ndx] = line[2:]+" ."
+                lines_that_need_shift.append(ndx)
+                if match.start() == 0:
+                    return
+        for line in lines_that_need_shift:
+            self.row[line] = self.row[line][2:]+" ."
 
     def nudge_right(self):
+        lines_that_need_shift = []
         for ndx, line in enumerate(self.row):
             match = re.search(r'[A-Z]', line)
             if match:
-                self.row[ndx] = ". "+line[:18]
+                lines_that_need_shift.append(ndx)
+                if line[-1:].isupper():
+                    return
+        for line in lines_that_need_shift:
+            self.row[line] = ". "+self.row[line][:-2]
 
     def nudge_down(self):
         for ndx, line in enumerate(self.row):
@@ -148,6 +167,9 @@ while True:
         command = ''
     elif command == ')':
         x.rotate_clockwise()
+        command = ''
+    elif command == '(':
+        x.rotate_anticlockwise()
         command = ''
     elif command == ';':
         x.output_line()
