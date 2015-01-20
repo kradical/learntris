@@ -79,7 +79,8 @@ class GameState:
             temp.append('')
         for ndx2, col in enumerate(self.active):
             for ndx1, row in enumerate(self.active):
-                pass
+                print(str(len(self.active)))
+                temp[ndx2] += self.active[ndx1][2*(len(self.active)-1)-2*ndx2]+' '
         self.active = temp
 
     @staticmethod
