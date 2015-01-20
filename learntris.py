@@ -1,7 +1,7 @@
 # learntris.py version 0.0.7
 from sys import stdin
 import re
-
+from collections import defaultdict
 
 class GameState:
     def __init__(self):
@@ -12,7 +12,7 @@ class GameState:
         self.lines_cleared = 0
         self.active_name = ''
         self.active = []
-        self.active_dictionary = dict()
+        self.active_dictionary = defaultdict(list)
         self.active_dictionary['cyan'] = ['. . . .', 'c c c c', '. . . .', '. . . .']
         self.active_dictionary['yellow'] = ['y y', 'y y']
         self.active_dictionary['red'] = ['r r .', '. r r', '. . .']
