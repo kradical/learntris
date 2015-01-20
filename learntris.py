@@ -1,4 +1,4 @@
-# learntris.py version 0.0.6
+# learntris.py version 0.0.7
 from sys import stdin
 import re
 
@@ -42,12 +42,12 @@ class GameState:
 
     def step_game(self):
         for ndx, row in enumerate(self.row):
-            if not '.' in self.row[ndx]:
+            if '.' not in self.row[ndx]:
                 self.row[ndx] = ". . . . . . . . . ."
                 self.score += 100
                 self.lines_cleared += 1
 
-    def set_active(self, tetranimo):
+    def initialize_active(self, tetranimo):
         self.active.clear()
         self.active_name = tetranimo
         for row in self.active_dictionary[tetranimo]:
@@ -58,6 +58,17 @@ class GameState:
             elif self.active_name == 'yellow':
                 self.row[line] = self.active[line].upper().join((". . . . ", " . . . ."))
             else:
+                self.row[line] = self.active[line].upper().join((". . . ", " . . . ."))
+
+    def set_active(self):
+        if self.active_name == 'yellow':
+            for line in range(2):
+                self.row[line] = self.active[line].upper().join((". . . . ", " . . . ."))
+        elif self.active_name == 'cyan':
+            for line in range(4):
+                self.row[line] = self.active[line].upper().join((". . . ", " . . ."))
+        else:
+            for line in range(3):
                 self.row[line] = self.active[line].upper().join((". . . ", " . . . ."))
 
     def check_active(self):
@@ -71,7 +82,9 @@ class GameState:
         for ndx2, col in enumerate(self.active):
             for ndx1, row in enumerate(self.active):
                 temp[ndx2] += self.active[len(self.active)-1-ndx1][2*ndx2]+' '
+            temp[ndx2] = temp[ndx2][:-1]
         self.active = temp
+        self.set_active()
 
     def rotate_anticlockwise(self):
         temp = []
@@ -79,9 +92,10 @@ class GameState:
             temp.append('')
         for ndx2, col in enumerate(self.active):
             for ndx1, row in enumerate(self.active):
-                print(str(len(self.active)))
                 temp[ndx2] += self.active[ndx1][2*(len(self.active)-1)-2*ndx2]+' '
+            temp[ndx2] = temp[ndx2][:-1]
         self.active = temp
+        self.set_active()
 
     @staticmethod
     def output_line():
@@ -111,10 +125,31 @@ class GameState:
 
     def nudge_down(self):
         for ndx, line in enumerate(self.row):
-            from_bottom_ndx = len(self.row) - ndx - 1
-            match = re.search(r'[A-Z]', self.row[from_bottom_ndx])
+            ndx2 = len(self.row) - ndx - 1
+            match = re.search(r'[A-Z]', self.row[ndx2])
             if match:
-                self.row[from_bottom_ndx], self.row[from_bottom_ndx+1] = self.row[from_bottom_ndx+1], self.row[from_bottom_ndx]
+                if ndx == 0:
+                    return
+                else:
+                    self.row[ndx2], self.row[ndx2+1] = self.row[ndx2+1], self.row[ndx2]
+
+    def place_tiles(self):
+        for ndx, row in enumerate(self.row):
+            self.row[ndx] = row.lower()
+
+    def drop_down(self):
+        while True:
+            for ndx, line in enumerate(self.row):
+                ndx2 = len(self.row) - ndx - 1
+                match = re.search(r'[A-Z]', self.row[ndx2])
+                if match:
+                    if ndx == 0:
+                        self.place_tiles()
+                        return
+                    else:
+                        self.row[ndx2], self.row[ndx2+1] = self.row[ndx2+1], self.row[ndx2]
+
+
 
 x = GameState()
 command = ''
@@ -143,25 +178,25 @@ while True:
         x.step_game()
         command = ''
     elif command == 'I':
-        x.set_active("cyan")
+        x.initialize_active("cyan")
         command = ''
     elif command == 'O':
-        x.set_active("yellow")
+        x.initialize_active("yellow")
         command = ''
     elif command == 'Z':
-        x.set_active("red")
+        x.initialize_active("red")
         command = ''
     elif command == 'S':
-        x.set_active("green")
+        x.initialize_active("green")
         command = ''
     elif command == 'J':
-        x.set_active("blue")
+        x.initialize_active("blue")
         command = ''
     elif command == 'L':
-        x.set_active("orange")
+        x.initialize_active("orange")
         command = ''
     elif command == 'T':
-        x.set_active("magenta")
+        x.initialize_active("magenta")
         command = ''
     elif command == 't':
         x.check_active()
@@ -183,6 +218,9 @@ while True:
         command = ''
     elif command == 'v':
         x.nudge_down()
+        command = ''
+    elif command == 'V':
+        x.drop_down()
         command = ''
     else:
         command = ''
