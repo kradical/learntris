@@ -1,4 +1,4 @@
-# learntris.py version 0.1.0
+# learntris.py version 0.1.1
 from sys import stdin
 import re
 from collections import defaultdict
@@ -70,8 +70,15 @@ class GameState:
 
     def set_active(self):
         for ndx1 in range(len(self.active)):
+            curr_row = ndx1 + self.top_left_active[0]
             for ndx2 in range(len(self.active)):
-                self.cell[ndx1][ndx2+self.top_left_active[1]] = self.active[ndx1][ndx2].upper()
+                curr_col = ndx2 + self.top_left_active[1]
+                if curr_col == len(self.cell[0]):
+                    break
+                elif curr_row >= len(self.cell):
+                    return
+                else:
+                    self.cell[ndx1+self.top_left_active[0]][ndx2+self.top_left_active[1]] = self.active[ndx1][ndx2].upper()
 
     def check_active(self):
         for row in self.active:
@@ -79,49 +86,60 @@ class GameState:
 
     def rotate_clockwise(self):
         self.active = list(zip(*self.active[::-1]))
+        self.set_active()
 
     def rotate_anticlockwise(self):
         self.active = list(zip(*self.active))[::-1]
+        self.set_active()
 
     @staticmethod
     def output_line():
         print()
 
-    def nudge_left(self):
-        self.top_left_active[1] -= 1
-        print(self.top_left_active[1])
-    def nudge_right(self):
-        lines_that_need_shift = []
-        for ndx, line in enumerate(self.cell):
-            match = re.search(r'[A-Z]', line)
-            if match:
-                lines_that_need_shift.append(ndx)
-                if line[-1:].isupper():
+    def clear_active(self):
+        for ndx1 in range(len(self.active)):
+            for ndx2 in range(len(self.active)):
+                if 'right' in self.detect_collision():
                     return
-        for line in lines_that_need_shift:
-            self.cell[line] = ". "+self.cell[line][:-2]
+                if ndx1+self.top_left_active[0] >= len(self.cell):
+                    return
+                self.cell[ndx1+self.top_left_active[0]][ndx2+self.top_left_active[1]] = '.'
 
-    def detect_collision(self, ndx):
-        if ndx == len(self.cell)-1:
-            return True
-        matches_upper = re.finditer(r'[A-Z]', self.cell[ndx])
-        matches_lower = re.finditer(r'[a-z]', self.cell[ndx+1])
-        for matchU in matches_upper:
-            for matchL in matches_lower:
-                if matchU.start() == matchL.start():
-                    return True
-        return False
+    def nudge_left(self):
+        if 'left' in self.detect_collision():
+            return
+        else:
+            self.clear_active()
+            self.top_left_active[1] -= 1
+            self.set_active()
+
+    def nudge_right(self):
+        if 'right' in self.detect_collision():
+            return
+        else:
+            self.clear_active()
+            self.top_left_active[1] += 1
+            self.set_active()
+
+    def detect_collision(self):
+        collides_with = []
+        for row in self.cell:
+            if row[0].isupper():
+                collides_with.append('left')
+            elif row[len(row)-1].isupper():
+                collides_with.append('right')
+        for col in self.cell[-1]:
+            if col.isupper():
+                collides_with.append('bottom')
+        return collides_with
 
     def nudge_down(self):
-        for ndx, line in enumerate(self.cell):
-            ndx2 = len(self.cell) - ndx - 1
-            match = re.search(r'[A-Z]', self.cell[ndx2])
-            if match:
-                if self.detect_collision(ndx2):
-                    return False
-                else:
-                    self.swap_elements(ndx2)
-        return True
+        if 'bottom' in self.detect_collision():
+            return
+        else:
+            self.clear_active()
+            self.top_left_active[0] += 1
+            self.set_active()
 
     def swap_elements(self, ndx2):
         upper_row = ndx2
