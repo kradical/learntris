@@ -1,4 +1,4 @@
-# learntris.py version 0.1.1
+# learntris.py version 0.2.0
 from sys import stdin
 import re
 from collections import defaultdict
@@ -9,6 +9,7 @@ num_cols = 10
 
 class GameState:
     def __init__(self):
+        self.menu_state = 'game'
         self.cell = []
         for j in range(num_rows):
             self.cell.append([])
@@ -29,8 +30,18 @@ class GameState:
         self.active_dictionary['magenta'] = [['.', 'm', '.'], ['m', 'm', 'm'], ['.', '.', '.']]
 
     def print_game_state(self):
-        for row in self.cell:
-            print(' '.join(row))
+        if self.menu_state == 'menu':
+            print("Learntris (c) 1992 Tetraminex, Inc.\nPress start button to begin.")
+        elif self.menu_state == 'pause':
+            print("Paused\nPress start button to continue.")
+        elif self.menu_state == 'game':
+            for row in self.cell:
+                print(' '.join(row))
+            for ndx1 in range(2):
+                for ndx2 in range(len(self.cell[0])):
+                    if self.cell[ndx1][ndx2].islower():
+                        print("Game Over")
+                        return
 
     def update_game_state(self):
         stdin.read(1)
@@ -77,6 +88,8 @@ class GameState:
                     break
                 elif curr_row >= len(self.cell):
                     return
+                elif self.cell[ndx1+self.top_left_active[0]][ndx2+self.top_left_active[1]].islower():
+                    pass
                 else:
                     self.cell[ndx1+self.top_left_active[0]][ndx2+self.top_left_active[1]] = self.active[ndx1][ndx2].upper()
 
@@ -99,11 +112,10 @@ class GameState:
     def clear_active(self):
         for ndx1 in range(len(self.active)):
             for ndx2 in range(len(self.active)):
-                if 'right' in self.detect_collision():
-                    return
                 if ndx1+self.top_left_active[0] >= len(self.cell):
                     return
-                self.cell[ndx1+self.top_left_active[0]][ndx2+self.top_left_active[1]] = '.'
+                if self.cell[ndx1+self.top_left_active[0]][ndx2+self.top_left_active[1]].isupper():
+                    self.cell[ndx1+self.top_left_active[0]][ndx2+self.top_left_active[1]] = '.'
 
     def nudge_left(self):
         if 'left' in self.detect_collision():
@@ -123,23 +135,37 @@ class GameState:
 
     def detect_collision(self):
         collides_with = []
+        prev_upper = []
+        this_upper = []
+        for col in self.cell[-1]:
+            if col.isupper():
+                collides_with.append('bottom')
         for row in self.cell:
             if row[0].isupper():
                 collides_with.append('left')
             elif row[len(row)-1].isupper():
                 collides_with.append('right')
-        for col in self.cell[-1]:
-            if col.isupper():
-                collides_with.append('bottom')
+            for j, col in enumerate(row):
+                if col.islower() and row[j+1].isupper():
+                    collides_with.append('left')
+                if col.islower() and row[j-1].isupper():
+                    collides_with.append('right')
+                if col.islower() and j in prev_upper:
+                    collides_with.append('bottom')
+                if col.isupper():
+                    this_upper.append(j)
+            prev_upper = this_upper
+            this_upper = []
         return collides_with
 
     def nudge_down(self):
         if 'bottom' in self.detect_collision():
-            return
+            return False
         else:
             self.clear_active()
             self.top_left_active[0] += 1
             self.set_active()
+            return True
 
     def swap_elements(self, ndx2):
         upper_row = ndx2
@@ -154,13 +180,22 @@ class GameState:
         self.cell[ndx2], self.cell[ndx2+1] = self.cell[ndx2+1], self.cell[ndx2]
 
     def place_tiles(self):
-        for ndx, row in enumerate(self.cell):
-            self.cell[ndx] = row.lower()
+        for i, row in enumerate(self.cell):
+            self.cell[i] = [cell.lower() for cell in row]
 
     def drop_down(self):
         while self.nudge_down():
             pass
         self.place_tiles()
+
+    def toggle_title_screen(self):
+        self.menu_state = 'menu'
+
+    def pause_screen(self):
+        if self.menu_state == 'pause' or self.menu_state == 'menu':
+            self.menu_state = 'game'
+        else:
+            self.menu_state = 'pause'
 
 
 x = GameState()
@@ -233,6 +268,12 @@ while True:
         command = ''
     elif command == 'V':
         x.drop_down()
+        command = ''
+    elif command == '@':
+        x.toggle_title_screen()
+        command = ''
+    elif command == '!':
+        x.pause_screen()
         command = ''
     else:
         command = ''
